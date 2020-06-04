@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="16096" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="collection view cell content view" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="UZU-XV-bPK" customClass="FilterCell" customModule="Course2FinalTask" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="120" height="80"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <collectionViewCellContentView key="contentView" opaque="NO" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="Axq-I0-ba7">
+                <rect key="frame" x="0.0" y="0.0" width="120" height="80"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="CIColorInvert" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="m6v-Fw-Bk5">
+                        <rect key="frame" x="10" y="58" width="101" height="21"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="7Kz-jp-i68">
+                        <rect key="frame" x="35" y="0.0" width="50" height="50"/>
+                    </imageView>
+                </subviews>
+                <color key="backgroundColor" red="0.39400571169999998" green="1" blue="0.42085778330000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                <constraints>
+                    <constraint firstItem="7Kz-jp-i68" firstAttribute="centerX" secondItem="Axq-I0-ba7" secondAttribute="centerX" id="CqF-5T-RIF"/>
+                    <constraint firstItem="7Kz-jp-i68" firstAttribute="leading" secondItem="Axq-I0-ba7" secondAttribute="leading" constant="35" id="J6g-vt-U1m"/>
+                    <constraint firstAttribute="bottom" secondItem="m6v-Fw-Bk5" secondAttribute="bottom" constant="1" id="Li6-Sg-ogb"/>
+                    <constraint firstItem="7Kz-jp-i68" firstAttribute="top" secondItem="Axq-I0-ba7" secondAttribute="top" id="dNi-9F-3P8"/>
+                    <constraint firstItem="7Kz-jp-i68" firstAttribute="centerX" secondItem="m6v-Fw-Bk5" secondAttribute="centerX" id="jL1-zC-gNB"/>
+                    <constraint firstItem="m6v-Fw-Bk5" firstAttribute="leading" secondItem="Axq-I0-ba7" secondAttribute="leading" constant="10" id="nPW-sd-dgc"/>
+                    <constraint firstItem="m6v-Fw-Bk5" firstAttribute="top" secondItem="7Kz-jp-i68" secondAttribute="bottom" constant="8" id="zpY-Cc-Jki"/>
+                </constraints>
+            </collectionViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="Fcg-NH-T3k"/>
+            <connections>
+                <outlet property="filterName" destination="m6v-Fw-Bk5" id="fPS-IY-8Wn"/>
+                <outlet property="smallFilterImageView" destination="7Kz-jp-i68" id="Iqt-IK-eyO"/>
+            </connections>
+            <point key="canvasLocation" x="23" y="78"/>
+        </collectionViewCell>
+    </objects>
+</document>
