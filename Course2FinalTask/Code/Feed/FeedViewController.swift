@@ -49,6 +49,7 @@ final class FeedViewController: UITableViewController {
                 DispatchQueue.main.async {
                     spinner?.stopAnimating()
                     self?.posts = sharedPost
+                    self?.tableView.scrollToRow(at: IndexPath(item: 0, section: 0), at: .top, animated: true)
                     self?.tableView.reloadData()
                 }
             }

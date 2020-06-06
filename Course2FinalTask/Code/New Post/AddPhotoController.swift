@@ -39,6 +39,7 @@ class AddPhotoController: UIViewController {
             }
         }
         performSegue(withIdentifier: "unwindToFeedCollection", sender: self)
+        self.navigationController?.popToRootViewController(animated: true)
     }
 
 }
