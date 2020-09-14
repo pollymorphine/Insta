@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import DataProvider
+import UIKit
 
 final class NewPostCell: UICollectionViewCell {
 

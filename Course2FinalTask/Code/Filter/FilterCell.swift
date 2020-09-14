@@ -8,7 +8,6 @@
 
 import Foundation
 import UIKit
-import DataProvider
 
 final class FilterCell: UICollectionViewCell {
 

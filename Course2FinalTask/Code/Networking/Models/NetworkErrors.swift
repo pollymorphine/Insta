@@ -7,3 +7,24 @@
 //
 
 import Foundation
+
+enum NetworkError: Error {
+    case badRequest(reason: String)
+    case unauthorized(reason: String)
+    case notFound(reason: String)
+    case notAcceptable(reason: String)
+    case unprocessable(reason: String)
+    case transferError(reason: String) 
+    
+    var error: String {
+     switch self {
+       case .notFound: return "Not found"
+       case .badRequest: return "Bad request"
+       case .unauthorized: return "Unauthorized"
+       case .notAcceptable: return "Not acceptable"
+       case .unprocessable: return "Incorrect login or password!"
+       case .transferError: return "Transfer error"
+     }
+   }
+
+}

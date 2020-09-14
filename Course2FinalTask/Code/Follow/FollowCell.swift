@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import DataProvider
 
 final class FollowCell: UITableViewCell {
 
@@ -15,7 +14,6 @@ final class FollowCell: UITableViewCell {
 
     @IBOutlet var userAvatar: UIImageView!
     @IBOutlet var userName: UILabel!
-    var userID = [User.Identifier]()
 
     override func awakeFromNib() {
         super.awakeFromNib()

@@ -26,6 +26,7 @@ class NetworkProvider {
     
     ////Авторизует пользователя и выдает токен.
     
+    
     func signIn(login: String, password: String, completionHandler: @escaping (Result<Token>) -> Void) {
         guard let url = URL(string: host + "/signin/") else { print("url is empty"); return }
         

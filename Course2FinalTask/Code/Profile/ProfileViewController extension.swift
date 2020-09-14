@@ -14,7 +14,7 @@ extension ProfileViewController {
     // MARK: Functions
     
     @objc func logout() {
-        SessionProvider.shared.signOut()
+        NetworkProvider.shared.signOut()
         Keychain.shared.deleteToken()
         performSegue(withIdentifier: "unwindToAuthentication", sender: self)
         self.navigationController?.popToRootViewController(animated: true)
@@ -30,18 +30,11 @@ extension ProfileViewController {
             }
           }
     
-//    @IBAction func logOutButton(_ sender: Any) {
-//        SessionProvider.shared.signOut()
-//        Keychain.shared.deleteToken()
-//        performSegue(withIdentifier: "unwindToAuthentication", sender: self)
-//        self.navigationController?.popToRootViewController(animated: true)
-//    }
-    
     func showFollowers() {
         guard let id = user?.id else { return }
         guard let follow = storyboard?.instantiateViewController(withIdentifier: "followViewController") as? FollowViewController else { return }
         
-        SessionProvider.shared.getFollowers(userID: id) { [weak self] result in
+        NetworkProvider.shared.getFollowers(userID: id) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let users):
@@ -64,7 +57,7 @@ extension ProfileViewController {
         guard let follow = storyboard?.instantiateViewController(withIdentifier:
             "followViewController") as? FollowViewController else { return }
         
-        SessionProvider.shared.getFollowingUsers(userID: id) { [weak self] result in
+        NetworkProvider.shared.getFollowingUsers(userID: id) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let users):
@@ -83,12 +76,11 @@ extension ProfileViewController {
     }
     
     func followUser(header: ProfileReusableView) {
-        
         guard let id = user?.id else { return }
         guard let text = header.followButton.titleLabel?.text else { return }
         
         if text == "Follow" {
-            SessionProvider.shared.follow(userID: id) { [weak self] result in
+            NetworkProvider.shared.follow(userID: id) { [weak self] result in
                 guard let self = self else { return }
                 
                 switch result {
@@ -105,7 +97,7 @@ extension ProfileViewController {
                 }
             }
         } else {
-            SessionProvider.shared.follow(userID: id) { [weak self] result in
+            NetworkProvider.shared.follow(userID: id) { [weak self] result in
                 guard let self = self else { return }
                 
                 switch result {
@@ -125,10 +117,10 @@ extension ProfileViewController {
     }
     
     public func userLoading() {
-        
         if let user = user {
             guard let id = self.user?.id else { return }
-            SessionProvider.shared.findUserPosts(userID: id) { [weak self] result in
+            
+            NetworkProvider.shared.findUserPosts(userID: id) { [weak self] result in
                 guard let self = self else { return }
                 switch result {
                 case .success(let posts):
@@ -136,12 +128,10 @@ extension ProfileViewController {
                     let sortedPosts = self.posts?.sorted(by: { $0.createdTime > $1.createdTime })
                     self.posts = sortedPosts
                     DispatchQueue.main.async {
-                        //self.logoutButtonView.isEnabled = false
                         self.navigationItem.title = user.username
                         self.collectionView.reloadData()
                     }
-                    
-                case .fail(let networkError):
+                    case .fail(let networkError):
                     Alert.shared.showError(self, message: networkError.error)
                 }
             }
@@ -149,14 +139,14 @@ extension ProfileViewController {
             
             self.navigationItem.title = user?.username
             
-            SessionProvider.shared.сurrentUser { [weak self] result in
+            NetworkProvider.shared.сurrentUser { [weak self] result in
                 guard let self = self else { return }
                 switch result {
                 case .success(let user):
                     self.user = user
                     guard let id = self.user?.id else { return }
                     
-                    SessionProvider.shared.findUserPosts(userID: id) { [weak self] result in
+                    NetworkProvider.shared.findUserPosts(userID: id) { [weak self] result in
                         guard let self = self else { return }
                         switch result {
                         case .success(let posts):

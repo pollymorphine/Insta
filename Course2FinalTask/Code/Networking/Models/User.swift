@@ -8,17 +8,17 @@
 
 import Foundation
 
-//struct User: Codable, Equatable {
-//    var id: String
-//    var username: String
-//    var fullName: String
-//    var avatar: String
-//    var currentUserFollowsThisUser: Bool
-//    var currentUserIsFollowedByThisUser: Bool
-//    var followsCount: Int
-//    var followedByCount: Int
-//    
-//    static func == (lhs: User, rhs: User) -> Bool {
-//        return lhs.id == rhs.id
-//    }
-//}
+struct User: Codable, Equatable {
+    var id: String
+    var username: String
+    var fullName: String
+    var avatar: String
+    var currentUserFollowsThisUser: Bool
+    var currentUserIsFollowedByThisUser: Bool
+    var followsCount: Int
+    var followedByCount: Int
+    
+    static func == (lhs: User, rhs: User) -> Bool {
+        return lhs.id == rhs.id
+    }
+}

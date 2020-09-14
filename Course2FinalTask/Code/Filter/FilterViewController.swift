@@ -8,7 +8,6 @@
 
 import Foundation
 import UIKit
-import DataProvider
 
 final class FilterViewController: UIViewController {
 
@@ -57,7 +56,7 @@ extension FilterViewController: UICollectionViewDataSource, UICollectionViewDele
         cell.smallFilterImageView.image = filterImage
 
         var filteredImage: UIImage?
-        queue.async(group: filterGroup) {
+        DispatchQueue.global(qos: .userInitiated).async(group: filterGroup) {
             guard let ciimage = CIImage(image: self.filterImage!) else { return }
             filteredImage = self.applyFilter(name: (self.filterNames[indexPath.item]), params: [kCIInputImageKey: ciimage])
         }
@@ -75,7 +74,7 @@ extension FilterViewController: UICollectionViewDataSource, UICollectionViewDele
         var filteredImage: UIImage?
         guard let image = self.imageCell.image else { return }
         guard let ciimage = CIImage(image: image) else { return }
-        queue.async(group: filterGroup) {
+        DispatchQueue.global(qos: .userInitiated).async(group: filterGroup) {
             filteredImage = self.applyFilter(name: self.filterNames[indexPath.item], params: [kCIInputImageKey: ciimage])
         }
 

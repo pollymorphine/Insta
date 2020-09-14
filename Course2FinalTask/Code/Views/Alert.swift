@@ -12,17 +12,14 @@ import UIKit
 public class Alert {
     
     static var shared = Alert()
-
+    
     func showError(_ viewController: UIViewController, message: String) {
-  DispatchQueue.main.async {
+        DispatchQueue.main.async {
             let alert = UIAlertController(title: "Error!", message: message, preferredStyle: .alert)
             let okAction = UIAlertAction(title: "OK", style: .default)
             
             alert.addAction(okAction)
-    viewController.present(alert, animated: true)
+            viewController.present(alert, animated: true)
         }
     }
 }
-
-
-//public let alert = Alert()

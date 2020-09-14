@@ -7,12 +7,12 @@
 //
 
 import UIKit
-import  DataProvider
+import Kingfisher
 
 final class ProfileReusableView: UICollectionReusableView {
 
-    @IBOutlet private var profileAvatar: UIImageView!
-    @IBOutlet private var userName: UILabel!
+    @IBOutlet  var profileAvatar: UIImageView!
+    @IBOutlet  var userName: UILabel!
     @IBOutlet var followersLabel: UILabel!
     @IBOutlet  var followingLabel: UILabel!
     @IBOutlet var followButton: UIButton!
@@ -33,7 +33,7 @@ final class ProfileReusableView: UICollectionReusableView {
     }
 
     func configure(user: User) {
-        profileAvatar.image = user.avatar
+        profileAvatar.kf.setImage(with: URL(string: user.avatar))
         userName.text = user.fullName
         followersLabel.text = "Followers: \(user.followedByCount)"
         followingLabel.text = "Following: \(user.followsCount)"
@@ -44,10 +44,12 @@ final class ProfileReusableView: UICollectionReusableView {
 }
 
     @objc func tapToWatchFollowers() {
+        spinner?.startAnimating()
         delegate?.showFollowers()
     }
 
     @objc func tapToWatchFollowing() {
+        spinner?.startAnimating()
         delegate?.showFollowing()
     }
 

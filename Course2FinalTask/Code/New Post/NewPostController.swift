@@ -8,24 +8,22 @@
 
 import Foundation
 import UIKit
-import DataProvider
 
 final class  NewPostController: UICollectionViewController {
 
-    private var photos: [UIImage]?
+    private var photos = [UIImage]()
     private var cellPhoto: UIImageView!
     private let reuseIdentifier = "newPostCell"
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        photos = photoProvider.photos()
+        photos = Photos.shared.setGallery()
     }
 
     // MARK: UICollectionViewDataSource
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        guard let photos = photos else { return 0 }
         return photos.count
     }
 
@@ -33,8 +31,8 @@ final class  NewPostController: UICollectionViewController {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as? NewPostCell
             else { return UICollectionViewCell() }
 
-        let photo = photos?[indexPath.row]
-        cell.newPostImage.image = photo
+         let photo = photos[indexPath.row]
+         cell.newPostImage.image = photo
 
         return cell
     }
@@ -50,7 +48,6 @@ final class  NewPostController: UICollectionViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         guard let destination = segue.destination as? FilterViewController else { return }
         destination.imageCell = self.cellPhoto
-
     }
 }
 

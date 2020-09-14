@@ -11,8 +11,6 @@ import UIKit
 
 public class Spinner: UIActivityIndicatorView {
     
-    static var shared = Spinner()
-
  private var optionalView: UIView?
 
     init(view: UIView) {

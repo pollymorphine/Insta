@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import DataProvider
+import Kingfisher
 
 final class FeedCell: UITableViewCell {
 
@@ -34,13 +34,14 @@ final class FeedCell: UITableViewCell {
 
     func configure(with post: Post) {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "'Today at' hh:mm:ss a"
-        let dateString = dateFormatter.string(from: post.createdTime)
-
-        userAvatar.image = post.authorAvatar
-        postDate.text = dateString
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        guard let dateString = dateFormatter.date(from: post.createdTime) else { return }
+        let date = dateFormatter.string(from: dateString)
+        
+        userAvatar.kf.setImage(with: URL(string: post.authorAvatar))
+        postDate.text = date
         userName.text = post.authorUsername
-        postImage.image = post.image
+        postImage.kf.setImage(with: URL(string: post.image))
         likesCount.text = "Likes: \(post.likedByCount)"
         descriptionLabel.text  = post.description
 
@@ -52,7 +53,7 @@ final class FeedCell: UITableViewCell {
     }
 
     @IBAction func tapLikeButton(_ sender: UIButton) {
-        delegate?.tapLikePostButton(cell: self)
+       delegate?.tapLikePostButton(cell: self)
     }
 
     @objc func tapToWatchProfile() {
