@@ -14,8 +14,6 @@ final class ProfileViewController: UICollectionViewController {
     var user: User?
     var posts:[Post]?
     
-    let reuseIdentifier = "profileCell"
-    let reuseHeaderIdentifier = "ProfileReusableView"
         
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,7 +30,7 @@ final class ProfileViewController: UICollectionViewController {
         }
         
         override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as? ProfileCell
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Identifier.profileCell, for: indexPath) as? ProfileCell
                 else { return UICollectionViewCell() }
             
             guard let currentPost = posts?[indexPath.row] else { return cell }
@@ -44,7 +42,7 @@ final class ProfileViewController: UICollectionViewController {
         override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
             let kind = UICollectionView.elementKindSectionHeader
             
-            guard let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: reuseHeaderIdentifier, for: indexPath) as? ProfileReusableView
+            guard let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: Identifier.profileReusableView, for: indexPath) as? ProfileReusableView
                 else { return UICollectionReusableView() }
             
             guard let user = user else { return headerView }

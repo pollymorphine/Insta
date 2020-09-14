@@ -10,9 +10,6 @@ import Foundation
 
 class RequestManager {
     
-    private let encoder = JSONEncoder()
-    private let decoder = JSONDecoder()
-    
     func getRequest(url: URL, paramBody: [String: String]? = nil) ->  URLRequest? {
         guard let token = Keychain.shared.readToken() else { print("no token"); return nil }
         

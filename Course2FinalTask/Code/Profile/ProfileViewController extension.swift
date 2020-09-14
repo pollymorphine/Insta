@@ -11,12 +11,12 @@ import Kingfisher
 
 extension ProfileViewController {
     
-    // MARK: Functions
+    // MARK: Methods
     
     @objc func logout() {
         NetworkProvider.shared.signOut()
         Keychain.shared.deleteToken()
-        performSegue(withIdentifier: "unwindToAuthentication", sender: self)
+        performSegue(withIdentifier: Identifier.unwindToAuthentication, sender: self)
         self.navigationController?.popToRootViewController(animated: true)
      }
 
@@ -32,7 +32,7 @@ extension ProfileViewController {
     
     func showFollowers() {
         guard let id = user?.id else { return }
-        guard let follow = storyboard?.instantiateViewController(withIdentifier: "followViewController") as? FollowViewController else { return }
+        guard let follow = storyboard?.instantiateViewController(withIdentifier: Identifier.followViewController) as? FollowViewController else { return }
         
         NetworkProvider.shared.getFollowers(userID: id) { [weak self] result in
             guard let self = self else { return }
@@ -55,7 +55,7 @@ extension ProfileViewController {
     func showFollowing() {
         guard let id = user?.id else { return }
         guard let follow = storyboard?.instantiateViewController(withIdentifier:
-            "followViewController") as? FollowViewController else { return }
+            Identifier.followViewController) as? FollowViewController else { return }
         
         NetworkProvider.shared.getFollowingUsers(userID: id) { [weak self] result in
             guard let self = self else { return }

@@ -13,7 +13,6 @@ final class  NewPostController: UICollectionViewController {
 
     private var photos = [UIImage]()
     private var cellPhoto: UIImageView!
-    private let reuseIdentifier = "newPostCell"
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,7 +27,7 @@ final class  NewPostController: UICollectionViewController {
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as? NewPostCell
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Identifier.newPostCell, for: indexPath) as? NewPostCell
             else { return UICollectionViewCell() }
 
          let photo = photos[indexPath.row]
@@ -41,7 +40,7 @@ final class  NewPostController: UICollectionViewController {
         let cell = collectionView.cellForItem(at: indexPath) as? NewPostCell
         cellPhoto = cell?.newPostImage
 
-        performSegue(withIdentifier: "showFilltersMenu", sender: nil)
+        performSegue(withIdentifier: Identifier.showFilltersMenu, sender: nil)
         spinner?.startAnimating()
     }
 

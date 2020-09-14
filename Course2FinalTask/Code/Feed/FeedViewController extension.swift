@@ -10,7 +10,7 @@ import UIKit
 
 extension FeedViewController {
     
-    // MARK: Functions
+    // MARK: Methods
     
     func feedLoading() {
         NetworkProvider.shared.getUsersPosts { [weak self] result in
@@ -50,7 +50,7 @@ extension FeedViewController {
     
     func showWhoLiked(cell: FeedCell) {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
-        guard  let userLiked = storyboard?.instantiateViewController(withIdentifier: "followViewController") as? FollowViewController else { return }
+        guard  let userLiked = storyboard?.instantiateViewController(withIdentifier: Identifier.followViewController) as? FollowViewController else { return }
         
         NetworkProvider.shared.getUsersLikedPost(userID: posts[indexPath.row].id)  { [weak self] result in
             guard let self = self else { return }
@@ -72,7 +72,7 @@ extension FeedViewController {
     
     func showProfile(cell: FeedCell) {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
-        guard let profile = storyboard?.instantiateViewController(withIdentifier: "profileCollectionController") as? ProfileViewController else { return }
+        guard let profile = storyboard?.instantiateViewController(withIdentifier: Identifier.profileCollectionController) as? ProfileViewController else { return }
         
         NetworkProvider.shared.getUser(userID: posts[indexPath.row].author) { [weak self] result in
             guard let self = self else { return }

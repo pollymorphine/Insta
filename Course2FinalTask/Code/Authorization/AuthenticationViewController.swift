@@ -18,22 +18,20 @@ final class AuthenticationViewController: UIViewController, UITextFieldDelegate 
     override  func viewDidLoad() {
         super.viewDidLoad()
         
-        signInButton.layer.cornerRadius = 6
+        //signInButton.layer.cornerRadius = 6
         setloginButton(enabled: false)
         
         passwordTextField.addTarget(self, action: #selector(textFieldChanged), for: .editingChanged)
         loginTextField.addTarget(self, action: #selector(textFieldChanged), for: .editingChanged)
         
-        let gestureView = UITapGestureRecognizer(target: self, action: #selector(tapRootView(_:)))
-        view.addGestureRecognizer(gestureView)
-        
     }
     
-    @objc func tapRootView(_ sender: UITapGestureRecognizer) {
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         view.endEditing(true)
     }
     
     private func setloginButton(enabled: Bool) {
+        signInButton.layer.cornerRadius = 6
         if enabled {
             signInButton.alpha = 1.0
             signInButton.isEnabled = true
@@ -56,7 +54,7 @@ final class AuthenticationViewController: UIViewController, UITextFieldDelegate 
             case .success(let token):
                 DispatchQueue.main.async {
                     Keychain.shared.saveToken(token.token)
-                    self.performSegue(withIdentifier: "switchToFeed", sender: self)
+                    self.performSegue(withIdentifier: Identifier.feedController, sender: self)
                     print(token)
                 }
             case .fail(let networkError):

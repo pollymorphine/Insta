@@ -37,7 +37,7 @@ class AddPhotoController: UIViewController {
             switch result {
             case .success( _):
                 DispatchQueue.main.async {
-                    self.performSegue(withIdentifier: "unwindToFeedCollection", sender: self)
+                    self.performSegue(withIdentifier: Identifier.unwindToFeedCollection, sender: self)
                     self.navigationController?.popToRootViewController(animated: true)
                 }
             case .fail(let networkError):

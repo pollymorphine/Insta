@@ -37,7 +37,7 @@ final class FeedViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "FeedCell", for: indexPath) as? FeedCell
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: Identifier.feedCell, for: indexPath) as? FeedCell
             else { return UITableViewCell() }
         
         cell.configure(with: posts[indexPath.row])

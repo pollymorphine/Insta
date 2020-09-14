@@ -24,31 +24,11 @@ final class FollowViewController: UITableViewController {
         spinner?.stopAnimating()
     }
     
-    // MARK: UITableViewDataSource
-    
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        guard let users = users else { return 0 }
-        return users.count
-    }
-    
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "followCell", for: indexPath) as? FollowCell
-            else { return UITableViewCell() }
-        
-        if let currentUser0 = users?[indexPath.row] {
-            cell.userAvatar.kf.setImage(with: URL(string: currentUser0.avatar))
-            cell.userName.text = currentUser0.fullName
-        }
-        cell.delegate = self
-        
-        return cell
-    }
-    
-    // MARK: - Functions
+    // MARK: - Methods
     
     func showProfile(cell: FollowCell) {
         guard let currentUserCell = currentUserCell(cell: cell) else { return }
-        guard let profile = storyboard?.instantiateViewController(withIdentifier: "profileCollectionController") as? ProfileViewController else { return }
+        guard let profile = storyboard?.instantiateViewController(withIdentifier: Identifier.profileCollectionController) as? ProfileViewController else { return }
         
         NetworkProvider.shared.getUser(userID: currentUserCell.id) { [weak self] result in
             guard let self = self else { return }
@@ -71,5 +51,25 @@ final class FollowViewController: UITableViewController {
             if let currentUsers = users { return currentUsers[indexPath.row]}
         }
         return nil
+    }
+    
+    // MARK: UITableViewDataSource
+    
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        guard let users = users else { return 0 }
+        return users.count
+    }
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: Identifier.followCell, for: indexPath) as? FollowCell
+            else { return UITableViewCell() }
+        
+        if let currentUser0 = users?[indexPath.row] {
+            cell.userAvatar.kf.setImage(with: URL(string: currentUser0.avatar))
+            cell.userName.text = currentUser0.fullName
+        }
+        cell.delegate = self
+        
+        return cell
     }
 }
