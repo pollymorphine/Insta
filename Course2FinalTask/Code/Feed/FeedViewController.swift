@@ -14,7 +14,7 @@ final class FeedViewController: UITableViewController {
     
     var user: User?
     var post: Post?
-    var posts = [Post]()
+    var posts = [PostClass]()
     
     override func viewDidLoad() {
         super.viewDidLoad()

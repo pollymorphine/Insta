@@ -32,8 +32,8 @@ final class ProfileReusableView: UICollectionReusableView {
         addTapsGestureRecognizer()
     }
 
-    func configure(user: User) {
-        profileAvatar.kf.setImage(with: URL(string: user.avatar))
+    func configure(user: UserClass) {
+        profileAvatar.kf.setImage(with: user.avatar)
         userName.text = user.fullName
         followersLabel.text = "Followers: \(user.followedByCount)"
         followingLabel.text = "Following: \(user.followsCount)"

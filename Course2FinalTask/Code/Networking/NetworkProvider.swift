@@ -9,11 +9,6 @@
 import Foundation
 import UIKit
 
-enum Result<T> {
-    case success(T)
-    case fail(NetworkError)
-}
-
 class NetworkProvider {
     
     private let host = "http://localhost:8080"
@@ -21,14 +16,42 @@ class NetworkProvider {
     private let decoder = JSONDecoder()
     private let requestManager = RequestManager()
     
+    //var isOfflineMode = true
+
     static var shared = NetworkProvider()
-    
+        
     private init() { }
     
+    ////Проверка токена.
+
+    func checkToken(token: String, completionHandler: @escaping (Result<Bool, NetworkError>) -> Void) {
+        guard let url = URL(string: host + "/checkToken") else { print("url is empty"); return }
+        
+        let defaultHeaders = [
+            "Content-Type" : "application/json",
+            "token" : token
+        ]
+        
+        var request = URLRequest(url: url)
+        request.allHTTPHeaderFields = defaultHeaders
+        request.httpMethod = "GET"
+        
+        
+        let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.failure(NetworkError.transferError(reason: "Transfer error"))); return }
+            
+            if httpResponse.statusCode != 200 {
+                self.requestManager.getErrorResponce(httpResponse: httpResponse)
+                completionHandler(.failure(error as! NetworkError))
+            }
+            print(httpResponse.statusCode)
+        }
+        dataTask.resume()
+  }
+    
     ////Авторизует пользователя и выдает токен.
-    
-    
-    func signIn(login: String, password: String, completionHandler: @escaping (Result<Token>) -> Void) {
+
+    func signIn(login: String, password: String, completionHandler: @escaping (Result<Token, NetworkError>) -> Void) {
         guard let url = URL(string: host + "/signin/") else { print("url is empty"); return }
         
         let account = Account(login: login, password: password)
@@ -43,11 +66,11 @@ class NetworkProvider {
         request.httpBody = accountData
         
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.fail(NetworkError.transferError(reason: "Transfer error"))); return }
+            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.failure(NetworkError.transferError(reason: "Transfer error"))); return }
             
             if httpResponse.statusCode != 200 {
                 self.requestManager.getErrorResponce(httpResponse: httpResponse)
-                completionHandler(.fail(error as! NetworkError))
+                completionHandler(.failure(error as! NetworkError))
             }
             guard let data = data else { return }
             
@@ -55,7 +78,7 @@ class NetworkProvider {
                 let token = try self.decoder.decode(Token.self, from: data)
                 completionHandler(.success(token))
             } catch {
-                completionHandler(.fail(NetworkError.unauthorized(reason: "Unathorized")))
+                completionHandler(.failure(NetworkError.unauthorized(reason: "Unathorized")))
             }
         }
         dataTask.resume()
@@ -73,16 +96,16 @@ class NetworkProvider {
     
     ////Возвращает информацию о текущем пользователе
     
-    func сurrentUser(completionHandler: @escaping (Result<User>) -> Void) {
+    func сurrentUser(completionHandler: @escaping (Result<User, NetworkError>) -> Void) {
         guard let url = URL(string: host + "/users/me") else { return }
         guard let request = requestManager.getRequest(url: url) else { return }
         
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.fail(NetworkError.transferError(reason: "Transfer error"))); return }
+            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.failure(NetworkError.transferError(reason: "Transfer error"))); return }
             
             if httpResponse.statusCode != 200 {
                 self.requestManager.getErrorResponce(httpResponse: httpResponse)
-                completionHandler(.fail(error as! NetworkError))
+                completionHandler(.failure(error as! NetworkError))
             }
             guard let data = data else { return }
             
@@ -91,7 +114,7 @@ class NetworkProvider {
                 completionHandler(.success(сurrentUser))
                 
             } catch {
-                completionHandler(.fail(NetworkError.unauthorized(reason: "Unathorized")))
+                completionHandler(.failure(NetworkError.unauthorized(reason: "Unathorized")))
             }
         }
         dataTask.resume()
@@ -99,16 +122,16 @@ class NetworkProvider {
     
     //// Возвращает публикации пользователя с запрошенным ID.
     
-    func findUserPosts(userID: String, completionHandler: @escaping (Result<[Post]>) -> Void) {
+    func findUserPosts(userID: String, completionHandler: @escaping (Result<[Post], NetworkError>) -> Void) {
         guard let url = URL(string: host + "/users/" + userID + "/posts") else { return }
         guard let  request = requestManager.getRequest(url: url) else { return }
         
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.fail(NetworkError.transferError(reason: "Transfer error"))); return }
+            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.failure(NetworkError.transferError(reason: "Transfer error"))); return }
             
             if httpResponse.statusCode != 200 {
                 self.requestManager.getErrorResponce(httpResponse: httpResponse)
-                completionHandler(.fail(error as! NetworkError))
+                completionHandler(.failure(error as! NetworkError))
             }
             guard let data = data else { return }
             
@@ -117,7 +140,7 @@ class NetworkProvider {
                 completionHandler(.success(posts))
                 
             } catch {
-                completionHandler(.fail(NetworkError.transferError(reason: "Unknown error")))
+                completionHandler(.failure(NetworkError.transferError(reason: "Unknown error")))
             }
         }
         dataTask.resume()
@@ -125,16 +148,16 @@ class NetworkProvider {
     
     ////Возвращает подписчиков пользователя с запрошенным ID.
     
-    func getFollowers(userID: String, completionHandler: @escaping (Result<[User]>) -> Void) {
+    func getFollowers(userID: String, completionHandler: @escaping (Result<[User], NetworkError>) -> Void) {
         guard let url = URL(string: host + "/users/" + userID + "/followers") else { return }
         guard let  request = requestManager.getRequest(url: url) else { return }
         
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.fail(NetworkError.transferError(reason: "Transfer error"))); return }
+            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.failure(NetworkError.transferError(reason: "Transfer error"))); return }
             
             if httpResponse.statusCode != 200 {
                 self.requestManager.getErrorResponce(httpResponse: httpResponse)
-                completionHandler(.fail(error as! NetworkError))
+                completionHandler(.failure(error as! NetworkError))
             }
             guard let data = data else { return }
             
@@ -143,7 +166,7 @@ class NetworkProvider {
                 completionHandler(.success(followers))
                 
             } catch {
-                completionHandler(.fail(NetworkError.transferError(reason: "Unknown error")))
+                completionHandler(.failure(NetworkError.transferError(reason: "Unknown error")))
             }
         }
         dataTask.resume()
@@ -151,16 +174,16 @@ class NetworkProvider {
     
     ////   Возвращает подписки пользователя с запрошенным ID.
     
-    func getFollowingUsers(userID: String, completionHandler: @escaping (Result<[User]>) -> Void) {
+    func getFollowingUsers(userID: String, completionHandler: @escaping (Result<[User], NetworkError>) -> Void) {
         guard let url = URL(string: host + "/users/" + userID + "/following") else { return }
         guard let  request = requestManager.getRequest(url: url) else { return }
         
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.fail(NetworkError.transferError(reason: "Transfer error"))); return }
+            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.failure(NetworkError.transferError(reason: "Transfer error"))); return }
             
             if httpResponse.statusCode != 200 {
                 self.requestManager.getErrorResponce(httpResponse: httpResponse)
-                completionHandler(.fail(error as! NetworkError))
+                completionHandler(.failure(error as! NetworkError))
             }
             guard let data = data else { return }
             
@@ -169,7 +192,7 @@ class NetworkProvider {
                 completionHandler(.success(followers))
                 
             } catch {
-                completionHandler(.fail(NetworkError.transferError(reason: "Unknown error")))
+                completionHandler(.failure(NetworkError.transferError(reason: "Unknown error")))
             }
         }
         dataTask.resume()
@@ -177,18 +200,18 @@ class NetworkProvider {
     
     //// Подписывает текущего пользователя на пользователя с запрошенным ID.
     
-    func follow(userID: String, _ completionHandler: @escaping (Result<User>) -> Void) {
+    func follow(userID: String, _ completionHandler: @escaping (Result<User, NetworkError>) -> Void) {
         guard let url = URL(string: host + "/users/follow") else { return }
         
         let jsonId = [ "userID" : userID]
         guard let request = requestManager.getRequest(url: url, paramBody: jsonId) else { return }
         
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.fail(NetworkError.transferError(reason: "Transfer error"))); return }
+            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.failure(NetworkError.transferError(reason: "Transfer error"))); return }
             
             if httpResponse.statusCode != 200 {
                 self.requestManager.getErrorResponce(httpResponse: httpResponse)
-                completionHandler(.fail(error as! NetworkError))
+                completionHandler(.failure(error as! NetworkError))
             }
             guard let data = data else { return }
             
@@ -197,7 +220,7 @@ class NetworkProvider {
                 completionHandler(.success(user))
                 
             } catch {
-                completionHandler(.fail(NetworkError.transferError(reason: "Unknown error")))
+                completionHandler(.failure(NetworkError.transferError(reason: "Unknown error")))
             }
         }
         dataTask.resume()
@@ -205,18 +228,18 @@ class NetworkProvider {
     
     //// Отписывает текущего пользователя от пользователя с запрошенным ID.
     
-    func unfollow(userID: String, _ completionHandler: @escaping (Result<User>) -> Void) {
+    func unfollow(userID: String, _ completionHandler: @escaping (Result<User, NetworkError>) -> Void) {
         guard let url = URL(string: host + "/users/unfollow") else { return }
         
         let jsonId = [ "userID" : userID]
         guard let request = requestManager.getRequest(url: url, paramBody: jsonId) else { return }
         
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.fail(NetworkError.transferError(reason: "Transfer error"))); return }
+            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.failure(NetworkError.transferError(reason: "Transfer error"))); return }
             
             if httpResponse.statusCode != 200 {
                 self.requestManager.getErrorResponce(httpResponse: httpResponse)
-                completionHandler(.fail(error as! NetworkError))
+                completionHandler(.failure(error as! NetworkError))
             }
             guard let data = data else { return }
             
@@ -225,7 +248,7 @@ class NetworkProvider {
                 completionHandler(.success(user))
                 
             } catch {
-                completionHandler(.fail(NetworkError.transferError(reason: "Unknown error")))
+                completionHandler(.failure(NetworkError.transferError(reason: "Unknown error")))
             }
         }
         
@@ -234,16 +257,16 @@ class NetworkProvider {
     
     /// Возвращает пользователя с переданным ID.
     
-    func getUser(userID: String, completionHandler: @escaping (Result<User>) -> Void) {
+    func getUser(userID: String, completionHandler: @escaping (Result<User, NetworkError>) -> Void) {
         guard let url = URL(string: host + "/users/" + userID) else { return }
         guard let request = requestManager.getRequest(url: url) else { return }
         
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.fail(NetworkError.transferError(reason: "Transfer error"))); return }
+            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.failure(NetworkError.transferError(reason: "Transfer error"))); return }
             
             if httpResponse.statusCode != 200 {
                 self.requestManager.getErrorResponce(httpResponse: httpResponse)
-                completionHandler(.fail(error as! NetworkError))
+                completionHandler(.failure(error as! NetworkError))
             }
             guard let data = data else { return }
             
@@ -252,7 +275,7 @@ class NetworkProvider {
                 completionHandler(.success(user))
                 
             } catch {
-                completionHandler(.fail(NetworkError.transferError(reason: "Unknown error")))
+                completionHandler(.failure(NetworkError.transferError(reason: "Unknown error")))
             }
         }
         dataTask.resume()
@@ -260,16 +283,16 @@ class NetworkProvider {
     
     //// Возвращает публикации пользователей, на которых подписан текущий пользователь.
     
-    func getUsersPosts(completionHandler: @escaping (Result<[Post]>) -> Void) {
+    func getUsersPosts(completionHandler: @escaping (Result<[Post], NetworkError>) -> Void) {
         guard let url = URL(string: host + "/posts/feed") else { return }
         guard let request = requestManager.getRequest(url: url) else { return }
         
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.fail(NetworkError.transferError(reason: "Transfer error"))); return }
+            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.failure(NetworkError.transferError(reason: "Transfer error"))); return }
             
             if httpResponse.statusCode != 200 {
                 self.requestManager.getErrorResponce(httpResponse: httpResponse)
-                completionHandler(.fail(error as! NetworkError))
+                completionHandler(.failure(error as! NetworkError))
             }
             guard let data = data else { return }
             
@@ -278,7 +301,7 @@ class NetworkProvider {
                 completionHandler(.success(posts))
                 
             } catch {
-                completionHandler(.fail(NetworkError.transferError(reason: "Unknown error")))
+                completionHandler(.failure(NetworkError.transferError(reason: "Unknown error")))
             }
         }
         dataTask.resume()
@@ -286,16 +309,16 @@ class NetworkProvider {
     
     //// Возвращает пользователей, поставивших лайк на публикацию с запрошенным ID
     
-    func getUsersLikedPost(userID: String, completionHandler: @escaping (Result<[User]>) -> Void) {
+    func getUsersLikedPost(userID: String, completionHandler: @escaping (Result<[User], NetworkError>) -> Void) {
         guard let url = URL(string: host + "/posts/" + userID + "/likes") else { return }
         guard let request = requestManager.getRequest(url: url) else { return }
         
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.fail(NetworkError.transferError(reason: "Transfer error"))); return }
+            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.failure(NetworkError.transferError(reason: "Transfer error"))); return }
             
             if httpResponse.statusCode != 200 {
                 self.requestManager.getErrorResponce(httpResponse: httpResponse)
-                completionHandler(.fail(error as! NetworkError))
+                completionHandler(.failure(error as! NetworkError))
             }
             guard let data = data else { return }
             
@@ -304,7 +327,7 @@ class NetworkProvider {
                 completionHandler(.success(followers))
                 
             } catch {
-                completionHandler(.fail(NetworkError.transferError(reason: "Unknown error")))
+                completionHandler(.failure(NetworkError.transferError(reason: "Unknown error")))
             }
         }
         dataTask.resume()
@@ -312,18 +335,18 @@ class NetworkProvider {
     
     ////  Ставит лайк от текущего пользователя на публикации с запрошенным ID.
     
-    func likePost(postID: String, completionHandler: @escaping (Result<Post>) -> Void) {
+    func likePost(postID: String, completionHandler: @escaping (Result<Post, NetworkError>) -> Void) {
         guard let url = URL(string: host +  "/posts/like") else { return }
         
         let jsonId = [ "postID" : postID]
         guard let request = requestManager.getRequest(url: url, paramBody: jsonId) else { return }
         
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.fail(NetworkError.transferError(reason: "Transfer error"))); return }
+            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.failure(NetworkError.transferError(reason: "Transfer error"))); return }
             
             if httpResponse.statusCode != 200 {
                 self.requestManager.getErrorResponce(httpResponse: httpResponse)
-                completionHandler(.fail(error as! NetworkError))
+                completionHandler(.failure(error as! NetworkError))
             }
             guard let data = data else { return }
             
@@ -332,7 +355,7 @@ class NetworkProvider {
                 completionHandler(.success(posts))
                 
             } catch {
-                completionHandler(.fail(NetworkError.transferError(reason: "Unknown error")))
+                completionHandler(.failure(NetworkError.transferError(reason: "Unknown error")))
             }
         }
         dataTask.resume()
@@ -340,18 +363,18 @@ class NetworkProvider {
     
     ////  Удаляет лайк от текущего пользователя на публикации с запрошенным ID.
     
-    func unlikePost(postID: String, completionHandler: @escaping (Result<Post>) -> Void) {
+    func unlikePost(postID: String, completionHandler: @escaping (Result<Post, NetworkError>) -> Void) {
         guard let url = URL(string: host +  "/posts/unlike") else { return }
         
         let jsonId = [ "postID" : postID]
         guard let request = requestManager.getRequest(url: url, paramBody: jsonId) else { return }
         
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.fail(NetworkError.transferError(reason: "Transfer error"))); return }
+            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.failure(NetworkError.transferError(reason: "Transfer error"))); return }
             
             if httpResponse.statusCode != 200 {
                 self.requestManager.getErrorResponce(httpResponse: httpResponse)
-                completionHandler(.fail(error as! NetworkError))
+                completionHandler(.failure(error as! NetworkError))
             }
             guard let data = data else { return }
             
@@ -360,7 +383,7 @@ class NetworkProvider {
                 completionHandler(.success(posts))
                 
             } catch {
-                completionHandler(.fail(NetworkError.transferError(reason: "Unknown error")))
+                completionHandler(.failure(NetworkError.transferError(reason: "Unknown error")))
             }
         }
         dataTask.resume()
@@ -370,7 +393,7 @@ class NetworkProvider {
     
     func addNewPost(with image: String,
                     description: String,
-                    completionHandler: @escaping (Result<Post>) -> Void) {
+                    completionHandler: @escaping (Result<Post, NetworkError>) -> Void) {
         guard let url = URL(string: host + "/posts/create") else { return }
         
         let jsonId = [
@@ -380,11 +403,11 @@ class NetworkProvider {
         guard let request = requestManager.getRequest(url: url, paramBody: jsonId) else { return }
         
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.fail(NetworkError.transferError(reason: "Transfer error"))); return }
+            guard let httpResponse = response as? HTTPURLResponse else { completionHandler(.failure(NetworkError.transferError(reason: "Transfer error"))); return }
             
             if httpResponse.statusCode != 200 {
                 self.requestManager.getErrorResponce(httpResponse: httpResponse)
-                completionHandler(.fail(error as! NetworkError))
+                completionHandler(.failure(error as! NetworkError))
             }
             guard let data = data else { return }
             
@@ -393,7 +416,7 @@ class NetworkProvider {
                 completionHandler(.success(posts))
                 
             } catch {
-                completionHandler(.fail(NetworkError.transferError(reason: "Unknown error")))
+                completionHandler(.failure(NetworkError.transferError(reason: "Unknown error")))
             }
         }
         dataTask.resume()

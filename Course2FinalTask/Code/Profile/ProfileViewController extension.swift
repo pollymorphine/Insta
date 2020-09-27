@@ -13,6 +13,14 @@ extension ProfileViewController {
     
     // MARK: Methods
     
+    func loadingUser() {
+        if CoreDataManager.shared.isOfflineMode {
+            loadDataFromCoreData()
+        } else {
+            userOnlineLoading()
+        }
+    }
+    
     @objc func logout() {
         NetworkProvider.shared.signOut()
         Keychain.shared.deleteToken()
@@ -31,7 +39,7 @@ extension ProfileViewController {
           }
     
     func showFollowers() {
-        guard let id = user?.id else { return }
+        guard let id = user1?.id else { return }
         guard let follow = storyboard?.instantiateViewController(withIdentifier: Identifier.followViewController) as? FollowViewController else { return }
         
         NetworkProvider.shared.getFollowers(userID: id) { [weak self] result in
@@ -44,7 +52,7 @@ extension ProfileViewController {
                     follow.navigationItemTitle = "Followers"
                     spinner?.stopAnimating()
                 }
-            case .fail(let networkError):
+            case .failure(let networkError):
                 DispatchQueue.main.async {
                     Alert.shared.showError(self, message: networkError.error)
                 }
@@ -53,7 +61,7 @@ extension ProfileViewController {
     }
     
     func showFollowing() {
-        guard let id = user?.id else { return }
+        guard let id = user1?.id else { return }
         guard let follow = storyboard?.instantiateViewController(withIdentifier:
             Identifier.followViewController) as? FollowViewController else { return }
         
@@ -67,7 +75,7 @@ extension ProfileViewController {
                     follow.navigationItemTitle = "Following"
                     spinner?.stopAnimating()
                 }
-            case .fail(let networkError):
+            case .failure(let networkError):
                 DispatchQueue.main.async {
                     Alert.shared.showError(self, message: networkError.error)
                 }
@@ -76,7 +84,7 @@ extension ProfileViewController {
     }
     
     func followUser(header: ProfileReusableView) {
-        guard let id = user?.id else { return }
+        guard let id = user1?.id else { return }
         guard let text = header.followButton.titleLabel?.text else { return }
         
         if text == "Follow" {
@@ -85,15 +93,15 @@ extension ProfileViewController {
                 
                 switch result {
                 case .success(let user):
-                    self.user = user
-                case .fail(let networkError):
+                    self.user1 =  user
+                case .failure(let networkError):
                     DispatchQueue.main.async {
                         Alert.shared.showError(self, message: networkError.error)
                     }
                 }
                 DispatchQueue.main.async {
                     header.followButton.setTitle("Unfollow", for: .normal)
-                    header.followersLabel.text = "Followers: \(self.user!.followedByCount + 0)"
+                    header.followersLabel.text = "Followers: \(self.user1!.followedByCount + 0)"
                 }
             }
         } else {
@@ -102,67 +110,76 @@ extension ProfileViewController {
                 
                 switch result {
                 case .success(let user):
-                    self.user = user
-                case .fail(let networkError):
+                    self.user1 =  user
+                case .failure(let networkError):
                     DispatchQueue.main.async {
                         Alert.shared.showError(self, message: networkError.error)
                     }
                 }
                 DispatchQueue.main.async {
                     header.followButton.setTitle("Follow", for: .normal)
-                    header.followersLabel.text = "Followers: \(self.user!.followedByCount - 1)"
+                    header.followersLabel.text = "Followers: \(self.user1!.followedByCount - 1)"
                 }
             }
         }
     }
     
-    public func userLoading() {
-        if let user = user {
-            guard let id = self.user?.id else { return }
+    public func userOnlineLoading() {
+        // пользователь из feed
+        if let user = user1 {
+            guard let id = self.user1?.id else { return }
             
             NetworkProvider.shared.findUserPosts(userID: id) { [weak self] result in
                 guard let self = self else { return }
                 switch result {
                 case .success(let posts):
-                    self.posts = posts
+                   // self.posts = posts
+                    self.posts = posts.compactMap { post in
+                        return PostClass.init(post: post)
+                    }
                     let sortedPosts = self.posts?.sorted(by: { $0.createdTime > $1.createdTime })
                     self.posts = sortedPosts
                     DispatchQueue.main.async {
                         self.navigationItem.title = user.username
                         self.collectionView.reloadData()
                     }
-                    case .fail(let networkError):
+                    case .failure(let networkError):
                     Alert.shared.showError(self, message: networkError.error)
                 }
             }
         } else {
-            
-            self.navigationItem.title = user?.username
+         // текущий пользователь
+            self.navigationItem.title = user1?.username
             
             NetworkProvider.shared.сurrentUser { [weak self] result in
                 guard let self = self else { return }
                 switch result {
                 case .success(let user):
-                    self.user = user
-                    guard let id = self.user?.id else { return }
+                    self.user1 =  user
+                    DataProvider.shared.createUserEntity(user)
+                    
+                    guard let id = self.user1?.id else { return }
                     
                     NetworkProvider.shared.findUserPosts(userID: id) { [weak self] result in
                         guard let self = self else { return }
                         switch result {
                         case .success(let posts):
-                            self.posts = posts
+                           // self.posts = posts
+                            self.posts = posts.compactMap { post in
+                                return PostClass.init(post: post)
+                            }
                             let sortedPosts = self.posts?.sorted(by: { $0.createdTime > $1.createdTime })
                             self.posts = sortedPosts
                             DispatchQueue.main.async {
                                 self.setupLogout() 
-                                self.navigationItem.title = self.user?.username
+                                self.navigationItem.title = self.user1?.username
                                 self.collectionView.reloadData()
                             }
-                        case .fail(let networkError):
+                        case .failure(let networkError):
                             Alert.shared.showError(self, message: networkError.error)
                         }
                     }
-                case .fail(let networkError):
+                case .failure(let networkError):
                     DispatchQueue.main.async {
                         Alert.shared.showError(self, message: networkError.error)
                     }
@@ -170,6 +187,25 @@ extension ProfileViewController {
             }
         }
     }
+    
+    func loadDataFromCoreData(){
+        guard let userFromCoreData = CoreDataManager.shared.fetchData(for: UserEntity.self).first,
+              let user = UserClass(user: userFromCoreData) else {
+//            DispatchQueue.main.async {
+//                self.collectionView.reloadData()
+//            }
+            return }
+        self.savedUser = user
+        let postsFromCoreData:[PostEntity] = CoreDataManager.shared.getEntity(userid: user.id)
+        self.posts = postsFromCoreData.compactMap({
+            (post) -> PostClass? in
+            return PostClass.init(post: post)
+        })
+//        DispatchQueue.main.async {
+//            self.collectionView.reloadData()
+//        }
+//
+   } 
 }
 
 

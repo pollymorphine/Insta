@@ -34,12 +34,12 @@ final class FollowViewController: UITableViewController {
             guard let self = self else { return }
             switch result {
             case .success(let user):
-                profile.user = user
+                profile.user1 =  user
                 DispatchQueue.main.async {
                     self.navigationController?.pushViewController(profile, animated: true)
                     spinner?.stopAnimating()
                 }
-            case .fail(let networkError):
+            case .failure(let networkError):
                 DispatchQueue.main.async {
                     Alert.shared.showError(self, message: networkError.error)
                 }
@@ -65,7 +65,7 @@ final class FollowViewController: UITableViewController {
             else { return UITableViewCell() }
         
         if let currentUser0 = users?[indexPath.row] {
-            cell.userAvatar.kf.setImage(with: URL(string: currentUser0.avatar))
+            cell.userAvatar.kf.setImage(with: currentUser0.avatar)
             cell.userName.text = currentUser0.fullName
         }
         cell.delegate = self

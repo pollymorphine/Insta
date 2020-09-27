@@ -40,7 +40,7 @@ class AddPhotoController: UIViewController {
                     self.performSegue(withIdentifier: Identifier.unwindToFeedCollection, sender: self)
                     self.navigationController?.popToRootViewController(animated: true)
                 }
-            case .fail(let networkError):
+            case .failure(let networkError):
                 Alert.shared.showError(self, message: networkError.error)
             }
         }

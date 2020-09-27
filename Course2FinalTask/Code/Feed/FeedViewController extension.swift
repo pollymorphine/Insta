@@ -13,36 +13,54 @@ extension FeedViewController {
     // MARK: Methods
     
     func feedLoading() {
+        if CoreDataManager.shared.isOfflineMode {
+          let savedPosts = CoreDataManager.shared.fetchData(for: PostEntity.self)
+            self.posts =  savedPosts.compactMap { post in
+                return PostClass.init(post: post)
+            }
+        
+        } else {
         NetworkProvider.shared.getUsersPosts { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let posts0):
-                self.posts = posts0
+            case .success(let posts):
+                self.posts =  posts.compactMap { post in
+                    return PostClass.init(post: post)
+                }
+                posts.forEach { post in
+                DataProvider.shared.createPostEntity(post)
+                }
                 DispatchQueue.main.async {
                     spinner?.startAnimating()
                     self.tableView.reloadData()
                 }
-            case .fail(let networkError):
+            case .failure(let networkError):
                 DispatchQueue.main.async {
                     Alert.shared.showError(self, message: networkError.error)
                 }
             }
         }
     }
+}
     
     func feedUpdate() {
         NetworkProvider.shared.getUsersPosts { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let addPost):
-                self.posts.insert(contentsOf: addPost, at: 0)
+                self.posts =  addPost.compactMap { post in
+                    return PostClass.init(post: post)
+                }
+                addPost.forEach { post in
+                DataProvider.shared.createPostEntity(post)
+                }
                 DispatchQueue.main.async {
                     spinner?.stopAnimating()
                     self.tableView.scrollToRow(at: IndexPath(item: 0, section: 0), at: .top, animated: true)
                     self.tableView.reloadData()
                 }
                 
-            case .fail(let networkError):
+            case .failure(let networkError):
                 Alert.shared.showError(self, message: networkError.error)
             }
         }
@@ -62,7 +80,7 @@ extension FeedViewController {
                     self.navigationController?.pushViewController(userLiked, animated: true)
                     spinner?.stopAnimating()
                 }
-            case .fail(let networkError):
+            case .failure(let networkError):
                 DispatchQueue.main.async {
                     Alert.shared.showError(self, message: networkError.error)
                 }
@@ -78,13 +96,13 @@ extension FeedViewController {
             guard let self = self else { return }
             
             switch result {
-            case .success(let user0):
-                profile.user = user0
+            case .success(let user):
+                profile.user1 = user
                 DispatchQueue.main.async {
                     self.navigationController?.pushViewController(profile, animated: true)
                     spinner?.stopAnimating()
                 }
-            case .fail(let networkError):
+            case .failure(let networkError):
                 DispatchQueue.main.async {
                     Alert.shared.showError(self, message: networkError.error)
                 }
@@ -101,7 +119,7 @@ extension FeedViewController {
                 switch result {
                 case .success(let post):
                     self.post = post
-                case .fail(let networkError):
+                case .failure(let networkError):
                     DispatchQueue.main.async {
                         Alert.shared.showError(self, message: networkError.error)
                     }
@@ -117,7 +135,7 @@ extension FeedViewController {
                 switch result {
                 case .success(let post):
                     self.post = post
-                case .fail(let networkError):
+                case .failure(let networkError):
                     DispatchQueue.main.async {
                         Alert.shared.showError(self, message: networkError.error)
                     }

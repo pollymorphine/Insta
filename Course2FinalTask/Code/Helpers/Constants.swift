@@ -18,6 +18,7 @@ enum Identifier {
     static let followCell = "followCell"
     static let profileCell = "profileCell"
     static let followViewController = "followViewController"
+    static let authenticationViewController = "authenticationViewController"
     static let profileCollectionController = "profileCollectionController"
     static let profileReusableView = "ProfileReusableView"
     static let unwindToAuthentication = "unwindToAuthentication"

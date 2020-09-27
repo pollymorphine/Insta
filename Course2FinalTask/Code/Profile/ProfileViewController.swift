@@ -11,13 +11,17 @@ import Kingfisher
 
 final class ProfileViewController: UICollectionViewController {
     
-    var user: User?
-    var posts:[Post]?
+   var savedUser: UserClass?
+    var user1: User?
+    //var posts:[PostClass]?
+    var posts:[PostClass]?
     
         
     override func viewDidLoad() {
         super.viewDidLoad()
-        userLoading()
+        
+    // loadingUser()
+       userOnlineLoading()
     }
 }
     // MARK: UICollectionViewDataSource
@@ -34,7 +38,7 @@ final class ProfileViewController: UICollectionViewController {
                 else { return UICollectionViewCell() }
             
             guard let currentPost = posts?[indexPath.row] else { return cell }
-            cell.profileImage.kf.setImage(with: URL(string: currentPost.image))
+            cell.profileImage.kf.setImage(with: currentPost.image)
             
             return cell
         }
@@ -45,7 +49,7 @@ final class ProfileViewController: UICollectionViewController {
             guard let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: Identifier.profileReusableView, for: indexPath) as? ProfileReusableView
                 else { return UICollectionReusableView() }
             
-            guard let user = user else { return headerView }
+            guard let user = savedUser else { return headerView }
             headerView.configure(user: user)
             
             headerView.delegate = self

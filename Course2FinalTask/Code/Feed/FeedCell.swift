@@ -32,16 +32,16 @@ final class FeedCell: UITableViewCell {
         bigLikeImage.alpha = 0.0
     }
 
-    func configure(with post: Post) {
+    func configure(with post: PostClass) {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
         guard let dateString = dateFormatter.date(from: post.createdTime) else { return }
         let date = dateFormatter.string(from: dateString)
         
-        userAvatar.kf.setImage(with: URL(string: post.authorAvatar))
+        userAvatar.kf.setImage(with: post.authorAvatar)
         postDate.text = date
         userName.text = post.authorUsername
-        postImage.kf.setImage(with: URL(string: post.image))
+        postImage.kf.setImage(with:  post.image)
         likesCount.text = "Likes: \(post.likedByCount)"
         descriptionLabel.text  = post.description
 
