@@ -12,7 +12,7 @@ struct User: Codable, Equatable {
     var id: String
     var username: String
     var fullName: String
-    var avatar: String
+    var avatar: URL
     var currentUserFollowsThisUser: Bool
     var currentUserIsFollowedByThisUser: Bool
     var followsCount: Int
