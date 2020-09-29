@@ -16,14 +16,14 @@ class NetworkProvider {
     private let decoder = JSONDecoder()
     private let requestManager = RequestManager()
     
-    //var isOfflineMode = true
-
+    var isOnlineMode = true
+    
     static var shared = NetworkProvider()
-        
+    
     private init() { }
     
     ////Проверка токена.
-
+    
     func checkToken(token: String, completionHandler: @escaping (Result<Bool, NetworkError>) -> Void) {
         guard let url = URL(string: host + "/checkToken") else { print("url is empty"); return }
         
@@ -42,15 +42,18 @@ class NetworkProvider {
             
             if httpResponse.statusCode != 200 {
                 self.requestManager.getErrorResponce(httpResponse: httpResponse)
-                completionHandler(.failure(error as! NetworkError))
+                guard let networkError = error else { return }
+                completionHandler(.failure(networkError as! NetworkError))
+                print(networkError)
             }
             print(httpResponse.statusCode)
+            completionHandler(.success(true))
         }
         dataTask.resume()
-  }
+    }
     
     ////Авторизует пользователя и выдает токен.
-
+    
     func signIn(login: String, password: String, completionHandler: @escaping (Result<Token, NetworkError>) -> Void) {
         guard let url = URL(string: host + "/signin/") else { print("url is empty"); return }
         

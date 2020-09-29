@@ -70,6 +70,7 @@ extension Keychain {
   func deleteToken() {
     let query = keychainQuery()
     _ = SecItemDelete(query as CFDictionary)
+    print("delete token")
   }
 }
 

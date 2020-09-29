@@ -34,7 +34,7 @@ final class FollowViewController: UITableViewController {
             guard let self = self else { return }
             switch result {
             case .success(let user):
-                profile.user1 =  user
+                profile.savedUser = UserClass(user: user)
                 DispatchQueue.main.async {
                     self.navigationController?.pushViewController(profile, animated: true)
                     spinner?.stopAnimating()

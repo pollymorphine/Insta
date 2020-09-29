@@ -26,6 +26,11 @@ class AddPhotoController: UIViewController {
     }
     
     @IBAction func shareButton(_ sender: Any) {
+        guard NetworkProvider.shared.isOnlineMode  else {
+            Alert.shared.showError(self, message: "Offline")
+            spinner?.stopAnimating()
+            return
+        }
         spinner?.startAnimating()
         
         guard let image = image else { return }

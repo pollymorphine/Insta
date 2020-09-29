@@ -13,35 +13,35 @@ extension FeedViewController {
     // MARK: Methods
     
     func feedLoading() {
-        if CoreDataManager.shared.isOfflineMode {
-          let savedPosts = CoreDataManager.shared.fetchData(for: PostEntity.self)
+        if NetworkProvider.shared.isOnlineMode == false {
+            let savedPosts = CoreDataManager.shared.fetchData(for: PostEntity.self)
             self.posts =  savedPosts.compactMap { post in
                 return PostClass.init(post: post)
             }
-        
+            
         } else {
-        NetworkProvider.shared.getUsersPosts { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let posts):
-                self.posts =  posts.compactMap { post in
-                    return PostClass.init(post: post)
-                }
-                posts.forEach { post in
-                DataProvider.shared.createPostEntity(post)
-                }
-                DispatchQueue.main.async {
-                    spinner?.startAnimating()
-                    self.tableView.reloadData()
-                }
-            case .failure(let networkError):
-                DispatchQueue.main.async {
-                    Alert.shared.showError(self, message: networkError.error)
+            NetworkProvider.shared.getUsersPosts { [weak self] result in
+                guard let self = self else { return }
+                switch result {
+                case .success(let posts):
+                    self.posts =  posts.compactMap { post in
+                        return PostClass.init(post: post)
+                    }
+                    posts.forEach { post in
+                        DataProvider.shared.createPostEntity(post)
+                    }
+                    DispatchQueue.main.async {
+                        spinner?.startAnimating()
+                        self.tableView.reloadData()
+                    }
+                case .failure(let networkError):
+                    DispatchQueue.main.async {
+                        Alert.shared.showError(self, message: networkError.error)
+                    }
                 }
             }
         }
     }
-}
     
     func feedUpdate() {
         NetworkProvider.shared.getUsersPosts { [weak self] result in
@@ -52,7 +52,7 @@ extension FeedViewController {
                     return PostClass.init(post: post)
                 }
                 addPost.forEach { post in
-                DataProvider.shared.createPostEntity(post)
+                    DataProvider.shared.createPostEntity(post)
                 }
                 DispatchQueue.main.async {
                     spinner?.stopAnimating()
@@ -61,12 +61,18 @@ extension FeedViewController {
                 }
                 
             case .failure(let networkError):
-                Alert.shared.showError(self, message: networkError.error)
+                print(networkError.error)
+                
             }
         }
     }
     
     func showWhoLiked(cell: FeedCell) {
+        guard NetworkProvider.shared.isOnlineMode  else {
+            Alert.shared.showError(self, message: "Offline")
+            spinner?.stopAnimating()
+            return
+        }
         guard let indexPath = tableView.indexPath(for: cell) else { return }
         guard  let userLiked = storyboard?.instantiateViewController(withIdentifier: Identifier.followViewController) as? FollowViewController else { return }
         
@@ -89,6 +95,11 @@ extension FeedViewController {
     }
     
     func showProfile(cell: FeedCell) {
+        guard NetworkProvider.shared.isOnlineMode else {
+            Alert.shared.showError(self, message: "Offline")
+            spinner?.stopAnimating()
+            return
+        }
         guard let indexPath = tableView.indexPath(for: cell) else { return }
         guard let profile = storyboard?.instantiateViewController(withIdentifier: Identifier.profileCollectionController) as? ProfileViewController else { return }
         
@@ -97,7 +108,7 @@ extension FeedViewController {
             
             switch result {
             case .success(let user):
-                profile.user1 = user
+                profile.savedUser = UserClass(user: user)
                 DispatchQueue.main.async {
                     self.navigationController?.pushViewController(profile, animated: true)
                     spinner?.stopAnimating()
@@ -111,6 +122,11 @@ extension FeedViewController {
     }
     
     func tapLikePostButton (cell: FeedCell) {
+        guard NetworkProvider.shared.isOnlineMode  else {
+            Alert.shared.showError(self, message: "Offline")
+            spinner?.stopAnimating()
+            return
+        }
         guard let indexPath = tableView.indexPath(for: cell) else { return }
         
         if cell.likeButton.tintColor == UIColor.lightGray {

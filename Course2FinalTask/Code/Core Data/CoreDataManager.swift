@@ -19,11 +19,7 @@ final class CoreDataManager {
     
     init(modelName: String) {
         self.modelName = modelName
-        
     }
-    
-    var isOfflineMode = true
-    
     
     // MARK: - Core Data stack
     
@@ -44,14 +40,11 @@ final class CoreDataManager {
         return persistentContainer.viewContext
     }
     
-    //    var context: NSManagedObjectContext = {
-    //      return persistentContainer.viewContext
-    //    }()
     
     func save(context: NSManagedObjectContext) {
-        guard context.hasChanges else { return }
         let privateMOC = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
         privateMOC.parent = context
+        guard context.hasChanges else { return }
         context.mergePolicy = NSMergePolicy(merge: .mergeByPropertyObjectTrumpMergePolicyType)
         do {
             try context.save()
@@ -85,24 +78,7 @@ final class CoreDataManager {
         save(context: context)
     }
     
-    func deleteAllData() {
-        
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "PostEntity")
-        fetchRequest.returnsObjectsAsFaults = false
-        let context = getContext()
-        do {
-            let results = try context.fetch(fetchRequest)
-            for object in results {
-                guard let objectData = object as? NSManagedObject else {continue}
-                context.delete(objectData)
-            }
-        } catch let error {
-            print("Detele all data in PostEntity error :", error)
-        }
-    }
-    
-    func getEntity<T: NSManagedObject>(userid: String) -> [T] {
-        
+    func getUserEntity<T: NSManagedObject>(userid: String) -> [T] {
         let idPredicate = NSPredicate(format: "author == '\(userid)'")
         let compoundPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [idPredicate])
         let sortDescriptor = NSSortDescriptor(key: "createdTime", ascending: false)
@@ -116,11 +92,8 @@ final class CoreDataManager {
         } else {
             result = resultArray
         }
-        
         return result
     }
-    
- 
     
     func fetchData<T: NSManagedObject>(for entity: T.Type, predicate: NSCompoundPredicate? = nil, sortDescriptor: NSSortDescriptor? = nil) -> [T] {
         
@@ -133,7 +106,7 @@ final class CoreDataManager {
         } else {
             request = NSFetchRequest(entityName: String(describing: entity))
         }
-    
+        
         if let predicate = predicate {
             request.predicate = predicate
         }
@@ -145,66 +118,9 @@ final class CoreDataManager {
         do {
             fetchResult = try context.fetch(request)
         } catch {
-            debugPrint("ERROR!!! Could not fetch: \(error.localizedDescription)")
+            debugPrint("no fetch: \(error.localizedDescription)")
         }
         
         return fetchResult
     }
-    
 }
-//    public func fetchData<T: NSManagedObject>(for entity: T.Type, predicate: NSPredicate? = nil) -> [T] {
-//
-//        let request: NSFetchRequest<T>
-//        var fetchedResult = [T]()
-//        let context = getContext()
-//
-//
-//        let entityName = String(describing: entity)
-//        request = NSFetchRequest(entityName: entityName)
-//
-//        request.predicate = predicate
-//
-//        if entity == PostEntity.self {
-//            let sortDescriptor = NSSortDescriptor(key: "createdTime", ascending: false)
-//            request.sortDescriptors = [sortDescriptor]
-//        }
-//
-//        do {
-//            fetchedResult = try context.fetch(request)
-//        } catch {
-//            debugPrint("Couldn't fetch \(error.localizedDescription)")
-//        }
-//
-//        return fetchedResult
-//
-//
-//    }
-//}
-
-
-//    func fetchData<T: NSManagedObject>(for entity: T.Type, predicate: NSCompoundPredicate? = nil, sortDescriptor: NSSortDescriptor? = nil) -> [T] {
-//
-//        let context = getContext()
-//        let request: NSFetchRequest<T>
-//        var fetchResult = [T]()
-//
-//        request = NSFetchRequest(entityName: String(describing: entity))
-//
-//        if let predicate = predicate {
-//            request.predicate = predicate
-//        }
-//
-//        if let sortDescriptor = sortDescriptor {
-//            request.sortDescriptors = [sortDescriptor]
-//        }
-//
-//        do {
-//            fetchResult = try context.fetch(request)
-//        } catch {
-//            debugPrint("Couldn't fetch \(error.localizedDescription)")
-//        }
-//
-//        return fetchResult
-//    }
-//}
-

@@ -21,9 +21,6 @@ final class AuthenticationViewController: UIViewController, UITextFieldDelegate 
     override  func viewDidLoad() {
         super.viewDidLoad()
         
-        
-       // chekToken()
-        //signInButton.layer.cornerRadius = 6
         setloginButton(enabled: false)
         
         passwordTextField.addTarget(self, action: #selector(textFieldChanged), for: .editingChanged)
@@ -31,8 +28,8 @@ final class AuthenticationViewController: UIViewController, UITextFieldDelegate 
         
     }
     override func viewDidAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-    //chekToken()
+        super.viewDidAppear(animated)
+        chekToken()
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -84,30 +81,29 @@ final class AuthenticationViewController: UIViewController, UITextFieldDelegate 
     }
     
     private func chekToken() {
-        print("QQQQQQQ")
         guard let token = Keychain.shared.readToken() else {
-            print("NO TOKEN")
-            return
+            print("no token")
+            return }
+        
+        print("Token exist")
+        NetworkProvider.shared.checkToken(token: token){ result in
+            
+            switch result {
+            case .success(_):
+                DispatchQueue.main.async {
+                    NetworkProvider.shared.isOnlineMode = true
+                    self.performSegue(withIdentifier: Identifier.feedController, sender: self)
+                }
+            case .failure(let networkError):
+                guard networkError == .transferError(reason: "transfer error") else {
+                    DispatchQueue.main.async {
+                        NetworkProvider.shared.isOnlineMode = false
+                        self.performSegue(withIdentifier: Identifier.feedController, sender: self)
+                    }
+                    return
+                }
+                Keychain.shared.deleteToken()
+            }
         }
-       self.performSegue(withIdentifier: Identifier.feedController, sender: self)
-        print("TOKEN: \(token)")
-        self.performSegue(withIdentifier: Identifier.feedController, sender: self)
-
-//        NetworkProvider.shared.checkToken(token: token) { result in
-//            
-//            switch result {
-//            case .success(_):
-//                DispatchQueue.main.async {
-//                    self.performSegue(withIdentifier: Identifier.feedController, sender: self)
-//                    print(token)
-//                }
-//            case .failure(_):
-//                DispatchQueue.main.async {
-//                    Alert.shared.showError(self, message: "ERRR")
-//                }
-//        }
-//        
-//    }
-    
-}
+    }
 }
